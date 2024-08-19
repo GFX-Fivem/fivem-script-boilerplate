@@ -4,8 +4,16 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  theme: {
-    extend: {},
-  },
-  plugins: [],
+  theme: {},
+  plugins: [
+    function ({ addUtilities }) {
+      addUtilities({
+        '.flex-center': {
+          display: 'flex',
+          'justify-content': 'center',
+          'align-items': 'center',
+        },
+      }, ['responsive', 'hover']);
+    }
+  ],
 }
