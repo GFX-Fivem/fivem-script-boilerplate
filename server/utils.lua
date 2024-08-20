@@ -218,6 +218,27 @@ function GetIdentifier(source)
     end
 end
 
+---@param source number The players server id
+function GetPlayerNameBySource(source)
+    if Utils.Framework == "es_extended" then
+        local player = GetPlayer(source)
+        return player.getName()
+    elseif Utils.Framework == "qb-core" then
+        local player = GetPlayer(source)
+        return player.PlayerData.charinfo.firstname.." "..player.PlayerData.charinfo.lastname
+    end
+end
+
+---@param item string The item name
+---@param handler function The handler function
+function RegisterItem(item, handler)
+    if Utils.Framework == "es_extended" then
+        Utils.FrameworkObject.RegisterUsableItem(item, handler)
+    elseif Utils.Framework == "qb-core" then
+        Utils.FrameworkObject.Functions.CreateUseableItem(item, handler)
+    end
+end
+
 ---@param id string|number The players identifier or server id
 function GetPlayerSkinData(id)
     id = type(id) == "number" and GetIdentifier(id) or id
@@ -517,10 +538,10 @@ function AddVehicleToPlayer(source, vehicle, props)
     local xPlayer = GetPlayer(source)
     local plate = CreateRandomPlate()
 
-    if Config.Framework == "qb" then
+    if Utils.Framework == "qb-core" then
         local cid = xPlayer.PlayerData.citizenid
         ExecuteSql("INSERT INTO player_vehicles (license, citizenid, vehicle, hash, mods, plate, garage, state) VALUES ('"..xPlayer.PlayerData.license.."', '"..cid.."', '"..vehicle.."', '"..GetHashKey(vehicle).."', '"..json.encode(props).."', '"..plate.."', '".."pillboxgarage".."', '0')")
-    else
+    elseif Utils.Framework == "es_extended" then
         local xPlayer = Framework.GetPlayerFromId(source)
         ExecuteSql("INSERT INTO owned_vehicles (owner, plate, vehicle, type, stored) VALUES ('"..xPlayer.identifier.."', '"..plate.."', '"..json.encode(json.encode(props)).."', '".."car".."', '0')")
     end
