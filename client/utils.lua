@@ -50,3 +50,151 @@ function TriggerCallback(name, ...)
   RemoveEventHandler(eventHandler)
   return result
 end
+
+function GetClosestPedToPlayer()
+  local playerPed = PlayerPedId()
+  local playerPos = GetEntityCoords(playerPed)
+  local closestPed = nil
+  local closestDistance = 1000.0
+  local ped = nil
+  for i = 0, 256 do
+    ped = GetPed(i)
+    if ped ~= playerPed then
+      local pedPos = GetEntityCoords(ped)
+      local distance = #(playerPos - pedPos)
+      if distance < closestDistance then
+        closestPed = ped
+        closestDistance = distance
+      end
+    end
+  end
+  return closestPed, closestDistance
+end
+
+function GetClosestVehicleToPlayer()
+  local playerPed = PlayerPedId()
+  local playerPos = GetEntityCoords(playerPed)
+  local closestVehicle = nil
+  local closestDistance = 1000.0
+  local vehicle = nil
+  for i = 0, 256 do
+    vehicle = GetVehicle(i)
+    if vehicle ~= playerPed then
+      local vehiclePos = GetEntityCoords(vehicle)
+      local distance = #(playerPos - vehiclePos)
+      if distance < closestDistance then
+        closestVehicle = vehicle
+        closestDistance = distance
+      end
+    end
+  end
+  return closestVehicle, closestDistance
+end
+
+---@param dict string The animation dictionary to load
+function LoadAnimDict(dict)
+  RequestAnimDict(dict)
+
+  while not HasAnimDictLoaded(dict) do
+    Wait(0)
+  end
+end
+
+---@param dict string The model dictionary to load
+function LoadObject(dict)
+  RequestModel(dict)
+
+  while not HasModelLoaded(dict) do
+    Wait(0)
+  end
+end
+
+---@param x number The x coordinate
+---@param y number The y coordinate
+---@param z number The z coordinate
+---@param model string The model to create
+---@param cb function The callback to run after the ped is created
+function CreatePedOnCoord(x, y, z, model, cb)
+  local pedModel = GetHashKey(model)
+  RequestModel(pedModel)
+  while not HasModelLoaded(pedModel) do
+    Wait(0)
+  end
+  local ped = CreatePed(4, pedModel, x, y, z, 0.0, true, false)
+  SetEntityAsMissionEntity(ped, true, true)
+  SetBlockingOfNonTemporaryEvents(ped, true)
+  SetModelAsNoLongerNeeded(pedModel)
+  if cb then
+    cb(ped)
+  end
+  return ped
+end
+
+---@param x number The x coordinate
+---@param y number The y coordinate
+---@param z number The z coordinate
+---@param sprite number The sprite to use for the blip
+---@param color number The color to use for the blip
+---@param text string The text to display on the blip
+function CreateBlipOnCoords(x, y, z, sprite, color, text)
+  local blip = AddBlipForCoord(x, y, z)
+  SetBlipSprite(blip, sprite)
+  SetBlipColour(blip, color)
+  SetBlipScale(blip, 0.8)
+  SetBlipAsShortRange(blip, true)
+  BeginTextCommandSetBlipName("STRING")
+  AddTextComponentString(text)
+  EndTextCommandSetBlipName(blip)
+  return blip
+end
+
+---@param t table
+function table_size(t)
+  local count = 0
+  for _ in pairs(t) do count = count + 1 end
+  return count
+end
+
+---@param x number The x coordinate
+---@param y number The y coordinate
+---@param z number The z coordinate
+---@param text string The text to draw
+function DrawText3D(x, y, z, text)
+  local onScreen, _x, _y = World3dToScreen2d(x, y, z)
+
+  if onScreen then
+    SetTextScale(0.25, 0.25)
+    SetTextFont(0)
+    SetTextProportional(1)
+    SetTextColour(255, 255, 255, 215)
+    SetTextDropShadow()
+    SetTextDropshadow(0, 0, 0, 255)
+    SetTextEdge(2, 0, 0, 0, 150)
+    SetTextDropShadow()
+    SetTextOutline()
+    SetTextEntry("STRING")
+    SetTextCentre(1)
+
+    AddTextComponentString(text)
+    DrawText(_x, _y)
+  end
+end
+
+---@param text string The text to display
+function ShowNotification(text)
+  SetNotificationTextEntry("STRING")
+  AddTextComponentString(text)
+  DrawNotification(false, false)
+end
+
+---@param entity number The entity to play the animation on
+---@param dict string The animation dictionary
+---@param anim string The animation to play
+---@param cb function The callback to run after the animation is played
+function PlayAnimationWithEntity(entity, dict, anim, cb)
+  LoadAnimDict(dict)
+  TaskPlayAnim(entity, dict, anim, 8.0, 8.0, -1, 1, 0, false, false, false)
+  if cb then
+    cb()
+  end
+end

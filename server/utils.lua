@@ -8,6 +8,10 @@ local Init = {
 local initialized = false
 local currentResourceName = GetCurrentResourceName()
 
+---@class Utils
+
+---@param name string The name of the event
+---@param cb function The callback function
 function RegisterCallback(name, cb)
     RegisterNetEvent(name, function(id, args)
         local src = source
@@ -148,6 +152,7 @@ function InitSQLScript()
     end
 end
 
+---@param query string The query to execute
 function ExecuteSql(query, parameters, cb)
     local promise = promise:new()
     if Utils.SQLScript == "oxmysql" then
@@ -175,6 +180,7 @@ function ExecuteSql(query, parameters, cb)
     return Citizen.Await(promise)
 end
 
+---@param source number The players server id
 function GetPlayer(source)
     if Utils.Framework == "es_extended" then
         return Utils.FrameworkObject.GetPlayerFromId(source)
@@ -183,6 +189,7 @@ function GetPlayer(source)
     end
 end
 
+---@param identifier string The players identifier
 function GetPlayerFromIdentifier(identifier)
     if Utils.Framework == "es_extended" then
         return Utils.FrameworkObject.GetPlayerFromIdentifier(identifier)
@@ -191,6 +198,7 @@ function GetPlayerFromIdentifier(identifier)
     end
 end
 
+---@param charId string The players character id
 function GetPlayerFromCharacterId(charId)
     if Utils.Framework == "es_extended" then
         return Utils.FrameworkObject.GetPlayerFromCharacterId(charId)
@@ -199,6 +207,7 @@ function GetPlayerFromCharacterId(charId)
     end
 end
 
+---@param source number The players server id
 function GetIdentifier(source)
     if Utils.Framework == "es_extended" then
         local player = GetPlayer(source)
@@ -209,6 +218,7 @@ function GetIdentifier(source)
     end
 end
 
+---@param id string|number The players identifier or server id
 function GetPlayerSkinData(id)
     id = type(id) == "number" and GetIdentifier(id) or id
     local p = promise:new()
@@ -319,6 +329,11 @@ AddItem =  {
     end
 }
 
+---@param source number The players server id
+---@param item string The item name
+---@param count number The amount of the item to add
+---@param metadata table The metadata of the item
+---@param slot number The slot of the item
 function AddItem(source, item, count, metadata, slot)
     if AddItem[Utils.InventoryName] then
         AddItem[Utils.InventoryName](source, item, count, metadata, slot)
@@ -347,6 +362,11 @@ RemoveItem = {
     end
 }
 
+---@param source number The players server id
+---@param item string The item name
+---@param count number The amount of the item to remove
+---@param metadata table The metadata of the item
+---@param slot number The slot of the item
 function RemoveItem(source, item, count, metadata, slot)
     if RemoveItem[Utils.InventoryName] then
         RemoveItem[Utils.InventoryName](source, item, count, metadata, slot)
@@ -377,6 +397,7 @@ GetInventory = {
     end
 }
 
+---@param source number The players server id
 function GetInventory(source)
     if GetInventory[Utils.InventoryName] then
         return GetInventory[Utils.InventoryName](source)
@@ -416,6 +437,7 @@ GetMoney = {
     end
 }
 
+---@param source number The players server id
 function GetMoney(source)
     if GetMoney[Utils.Framework] then
         return GetMoney[Utils.Framework](source)
@@ -433,6 +455,8 @@ AddMoney = {
     end
 }
 
+---@param source number The players server id
+---@param amount number The amount of money to add
 function AddMoney(source, amount)
     if AddMoney[Utils.Framework] then
         AddMoney[Utils.Framework](source, amount)
@@ -450,6 +474,8 @@ RemoveMoney = {
     end
 }
 
+---@param source number The players server id
+---@param amount number The amount of money to remove
 function RemoveMoney(source, amount)
     if RemoveMoney[Utils.Framework] then
         RemoveMoney[Utils.Framework](source, amount)
@@ -467,16 +493,45 @@ HasMoney = {
     end
 }
 
+---@param source number The players server id
+---@param amount number The amount of money to check
 function HasMoney(source, amount)
     if HasMoney[Utils.Framework] then
         return HasMoney[Utils.Framework](source, amount)
     end
 end
 
+---@param source number The players server id
+---@param item string The item name
+---@param count number The amount of the item to remove
 function HasItem(source, item, count)
     if HasItem[Utils.InventoryName] then
         return HasItem[Utils.InventoryName](source, item, count)
     end
+end
+
+---@param source number The players server id
+---@param item string The item name
+---@param count number The amount of the item to remove
+function AddVehicleToPlayer(source, vehicle, props)
+    local xPlayer = GetPlayer(source)
+    local plate = CreateRandomPlate()
+
+    if Config.Framework == "qb" then
+        local cid = xPlayer.PlayerData.citizenid
+        ExecuteSql("INSERT INTO player_vehicles (license, citizenid, vehicle, hash, mods, plate, garage, state) VALUES ('"..xPlayer.PlayerData.license.."', '"..cid.."', '"..vehicle.."', '"..GetHashKey(vehicle).."', '"..json.encode(props).."', '"..plate.."', '".."pillboxgarage".."', '0')")
+    else
+        local xPlayer = Framework.GetPlayerFromId(source)
+        ExecuteSql("INSERT INTO owned_vehicles (owner, plate, vehicle, type, stored) VALUES ('"..xPlayer.identifier.."', '"..plate.."', '"..json.encode(json.encode(props)).."', '".."car".."', '0')")
+    end
+end
+
+function CreateRandomPlate()
+    local plate = ""
+    for i = 1, 8 do
+        plate = plate .. string.char(math.random(65, 90))
+    end
+    return plate
 end
 
 Citizen.CreateThread(function()
