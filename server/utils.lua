@@ -4,6 +4,7 @@ local Init = {
     SkinScripts =  { "esx_skin", "qb-clothing", "skinchanger", "illenium-appearance", "fivem-appearance" },
     SQLScripts  =  { "mysql-async", "ghmattimysql", "oxmysql" },
 }
+
 local initialized = false
 local currentResourceName = GetCurrentResourceName()
 
@@ -149,7 +150,6 @@ end
 
 function ExecuteSql(query, parameters, cb)
     local promise = promise:new()
-
     if Utils.SQLScript == "oxmysql" then
         exports.oxmysql:execute(query, parameters, function(data)
             promise:resolve(data)
@@ -294,6 +294,189 @@ function GetPlayerSkinData(id)
         end)
     end
     return Citizen.Await(p)
+end
+
+AddItem =  {
+    ["esx_inventoryhud"] = function(source, item, count)
+        local xPlayer = Utils.FrameworkObject.GetPlayerFromId(source)
+        xPlayer.addInventoryItem(item, count)
+    end,
+    ["qb-inventory"] = function(source, item, count, metadata, slot)
+        exports["qb-inventory"]:AddItem(source, item, count, slot, metadata)
+    end,
+    ["gfx-inventory"] = function(source, item, count)
+        exports["gfx-inventory"]:AddItem(source, "inventory", item, count)
+    end,
+    ["ox_inventory"] = function(source, item, count, metadata, slot)
+        exports["ox_inventory"]:AddItem(source, item, count, metadata, slot)
+        
+    end,
+    ["codem-inventory"] = function(source, item, count, metadata, slot)
+        exports["codem-inventory"]:AddItem(source, item, count, slot, metadata)
+    end,
+    ["qs-inventory"] = function(source, item, count, metadata, slot)
+        exports["qs-inventory"]:AddItem(source, item, count, slot, metadata)
+    end
+}
+
+function AddItem(source, item, count, metadata, slot)
+    if AddItem[Utils.InventoryName] then
+        AddItem[Utils.InventoryName](source, item, count, metadata, slot)
+    end
+end
+
+RemoveItem = {
+    ["esx_inventoryhud"] = function(source, item, count)
+        local xPlayer = Utils.FrameworkObject.GetPlayerFromId(source)
+        xPlayer.removeInventoryItem(item, count)
+    end,
+    ["qb-inventory"] = function(source, item, count, metadata, slot)
+        exports["qb-inventory"]:RemoveItem(source, item, count, slot, metadata)
+    end,
+    ["gfx-inventory"] = function(source, item, count)
+        exports["gfx-inventory"]:RemoveItem(source, "inventory", item, count)
+    end,
+    ["ox_inventory"] = function(source, item, count, metadata, slot)
+        exports["ox_inventory"]:RemoveItem(source, item, count, metadata, slot)
+    end,
+    ["codem-inventory"] = function(source, item, count, metadata, slot)
+        exports["codem-inventory"]:RemoveItem(source, item, count, slot)
+    end,
+    ["qs-inventory"] = function(source, item, count, metadata, slot)
+        exports["qs-inventory"]:RemoveItem(source, item, count, slot, metadata)
+    end
+}
+
+function RemoveItem(source, item, count, metadata, slot)
+    if RemoveItem[Utils.InventoryName] then
+        RemoveItem[Utils.InventoryName](source, item, count, metadata, slot)
+    end
+end
+
+GetInventory = {
+    ["esx_inventoryhud"] = function(source)
+        local xPlayer = Utils.FrameworkObject.GetPlayerFromId(source)
+        return xPlayer.getInventory()
+    end,
+    ["qb-inventory"] = function(source)
+        local player = GetPlayer(source)
+        return player.PlayerData.items
+    end,
+    ["gfx-inventory"] = function(source)
+        return exports["gfx-inventory"]:GetInventory(source, "inventory")
+    end,
+    ["ox_inventory"] = function(source)
+        return exports["ox_inventory"]:GetInventoryItems(source)
+    end,
+    ["codem-inventory"] = function(source)
+        local identifier = type(source) == "string" and source or nil
+        return exports["codem-inventory"]:GetInventory(identifier, source)
+    end,
+    ["qs-inventory"] = function(source)
+        return exports["qs-inventory"]:GetInventory(source)
+    end
+}
+
+function GetInventory(source)
+    if GetInventory[Utils.InventoryName] then
+        return GetInventory[Utils.InventoryName](source)
+    end
+end
+
+HasItem = {
+    ["esx_inventoryhud"] = function(source, item, count)
+        local xPlayer = Utils.FrameworkObject.GetPlayerFromId(source)
+        return xPlayer.getInventoryItem(item).count >= count
+    end,
+    ["qb-inventory"] = function(source, item, count)
+        return exports["qb-inventory"]:HasItem(source, item, count)
+    end,
+    ["gfx-inventory"] = function(source, item, count)
+        return exports["gfx-inventory"]:HasItem(source, "inventory", item, count)
+    end,
+    ["ox_inventory"] = function(source, item, count)
+        return exports["ox_inventory"]:GetItemCount(source, item) >= count
+    end,
+    ["codem-inventory"] = function(source, item, count)
+        return exports["codem-inventory"]:HasItem(source, item, count)
+    end,
+    ["qs-inventory"] = function(source, item, count)
+        return exports["qs-inventory"]:GetItemTotalAmount(source, item) >= count
+    end
+}
+
+GetMoney = {
+    ["es_extended"] = function(source)
+        local xPlayer = Utils.FrameworkObject.GetPlayerFromId(source)
+        return xPlayer.getMoney()
+    end,
+    ["qb-core"] = function(source)
+        local player = GetPlayer(source)
+        return player.PlayerData.money["cash"]
+    end
+}
+
+function GetMoney(source)
+    if GetMoney[Utils.Framework] then
+        return GetMoney[Utils.Framework](source)
+    end
+end
+
+AddMoney = {
+    ["es_extended"] = function(source, amount)
+        local xPlayer = Utils.FrameworkObject.GetPlayerFromId(source)
+        xPlayer.addMoney(amount)
+    end,
+    ["qb-core"] = function(source, amount)
+        local player = GetPlayer(source)
+        player.Functions.AddMoney("cash", amount)
+    end
+}
+
+function AddMoney(source, amount)
+    if AddMoney[Utils.Framework] then
+        AddMoney[Utils.Framework](source, amount)
+    end
+end
+
+RemoveMoney = {
+    ["es_extended"] = function(source, amount)
+        local xPlayer = Utils.FrameworkObject.GetPlayerFromId(source)
+        xPlayer.removeMoney(amount)
+    end,
+    ["qb-core"] = function(source, amount)
+        local player = GetPlayer(source)
+        player.Functions.RemoveMoney("cash", amount)
+    end
+}
+
+function RemoveMoney(source, amount)
+    if RemoveMoney[Utils.Framework] then
+        RemoveMoney[Utils.Framework](source, amount)
+    end
+end
+
+HasMoney = {
+    ["es_extended"] = function(source, amount)
+        local xPlayer = Utils.FrameworkObject.GetPlayerFromId(source)
+        return xPlayer.getMoney() >= amount
+    end,
+    ["qb-core"] = function(source, amount)
+        local player = GetPlayer(source)
+        return player.PlayerData.money["cash"] >= amount
+    end
+}
+
+function HasMoney(source, amount)
+    if HasMoney[Utils.Framework] then
+        return HasMoney[Utils.Framework](source, amount)
+    end
+end
+
+function HasItem(source, item, count)
+    if HasItem[Utils.InventoryName] then
+        return HasItem[Utils.InventoryName](source, item, count)
+    end
 end
 
 Citizen.CreateThread(function()
