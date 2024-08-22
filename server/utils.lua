@@ -46,6 +46,7 @@ end
 function InitalFunc()
     if initialized then return end
     initialized = true
+
     InitFramework()
     InitInventory()
     InitSkinScript()
@@ -83,7 +84,7 @@ function InitFrameworkObject()
     if Utils.Framework == "es_extended" then
         local ESX = nil
         TriggerEvent("esx:getSharedObject", function(obj) ESX = obj end)
-        Citizen.Wait(1000)
+        Wait(100)
         if ESX == nil then
             ESX = exports["es_extended"]:getSharedObject()
         end
@@ -91,7 +92,7 @@ function InitFrameworkObject()
     elseif Utils.Framework == "qb-core" then
         local QBCore = nil
         TriggerEvent("QBCore:GetObject", function(obj) QBCore = obj end)
-        Citizen.Wait(1000)
+        Wait(100)
         if QBCore == nil then
             QBCore = exports["qb-core"]:GetCoreObject()
         end
@@ -327,7 +328,18 @@ function GetPlayerSkinData(id)
     return Citizen.Await(p)
 end
 
-AddItem =  {
+---@param source number The players server id
+---@param item string The item name
+---@param count number The amount of the item to add
+---@param metadata table The metadata of the item
+---@param slot number The slot of the item
+function AddItem(source, item, count, metadata, slot)
+    if AddItemData[Utils.InventoryName] then
+        AddItemData[Utils.InventoryName](source, item, count, metadata, slot)
+    end
+end
+
+AddItemData =  {
     ["esx_inventoryhud"] = function(source, item, count)
         local xPlayer = Utils.FrameworkObject.GetPlayerFromId(source)
         xPlayer.addInventoryItem(item, count)
@@ -352,16 +364,16 @@ AddItem =  {
 
 ---@param source number The players server id
 ---@param item string The item name
----@param count number The amount of the item to add
+---@param count number The amount of the item to remove
 ---@param metadata table The metadata of the item
 ---@param slot number The slot of the item
-function AddItem(source, item, count, metadata, slot)
-    if AddItem[Utils.InventoryName] then
-        AddItem[Utils.InventoryName](source, item, count, metadata, slot)
+function RemoveItem(source, item, count, metadata, slot)
+    if RemoveItemData[Utils.InventoryName] then
+        RemoveItemData[Utils.InventoryName](source, item, count, metadata, slot)
     end
 end
 
-RemoveItem = {
+RemoveItemData = {
     ["esx_inventoryhud"] = function(source, item, count)
         local xPlayer = Utils.FrameworkObject.GetPlayerFromId(source)
         xPlayer.removeInventoryItem(item, count)
@@ -384,17 +396,13 @@ RemoveItem = {
 }
 
 ---@param source number The players server id
----@param item string The item name
----@param count number The amount of the item to remove
----@param metadata table The metadata of the item
----@param slot number The slot of the item
-function RemoveItem(source, item, count, metadata, slot)
-    if RemoveItem[Utils.InventoryName] then
-        RemoveItem[Utils.InventoryName](source, item, count, metadata, slot)
+function GetInventory(source)
+    if GetInventoryData[Utils.InventoryName] then
+        return GetInventoryData[Utils.InventoryName](source)
     end
 end
 
-GetInventory = {
+GetInventoryData = {
     ["esx_inventoryhud"] = function(source)
         local xPlayer = Utils.FrameworkObject.GetPlayerFromId(source)
         return xPlayer.getInventory()
@@ -419,13 +427,15 @@ GetInventory = {
 }
 
 ---@param source number The players server id
-function GetInventory(source)
-    if GetInventory[Utils.InventoryName] then
-        return GetInventory[Utils.InventoryName](source)
+---@param item string The item name
+---@param count number The amount of the item to remove
+function HasItem(source, item, count)
+    if HasItemData[Utils.InventoryName] then
+        return HasItemData[Utils.InventoryName](source, item, count)
     end
 end
 
-HasItem = {
+HasItemData = {
     ["esx_inventoryhud"] = function(source, item, count)
         local xPlayer = Utils.FrameworkObject.GetPlayerFromId(source)
         return xPlayer.getInventoryItem(item).count >= count
@@ -447,7 +457,14 @@ HasItem = {
     end
 }
 
-GetMoney = {
+---@param source number The players server id
+function GetMoney(source)
+    if GetMoneyData[Utils.Framework] then
+        return GetMoneyData[Utils.Framework](source)
+    end
+end
+
+GetMoneyData = {
     ["es_extended"] = function(source)
         local xPlayer = Utils.FrameworkObject.GetPlayerFromId(source)
         return xPlayer.getMoney()
@@ -459,13 +476,14 @@ GetMoney = {
 }
 
 ---@param source number The players server id
-function GetMoney(source)
-    if GetMoney[Utils.Framework] then
-        return GetMoney[Utils.Framework](source)
+---@param amount number The amount of money to add
+function AddMoney(source, amount)
+    if AddMoneyData[Utils.Framework] then
+        AddMoneyData[Utils.Framework](source, amount)
     end
 end
 
-AddMoney = {
+AddMoneyData = {
     ["es_extended"] = function(source, amount)
         local xPlayer = Utils.FrameworkObject.GetPlayerFromId(source)
         xPlayer.addMoney(amount)
@@ -477,14 +495,14 @@ AddMoney = {
 }
 
 ---@param source number The players server id
----@param amount number The amount of money to add
-function AddMoney(source, amount)
-    if AddMoney[Utils.Framework] then
-        AddMoney[Utils.Framework](source, amount)
+---@param amount number The amount of money to remove
+function RemoveMoney(source, amount)
+    if RemoveMoneyData[Utils.Framework] then
+        RemoveMoneyData[Utils.Framework](source, amount)
     end
 end
 
-RemoveMoney = {
+RemoveMoneyData = {
     ["es_extended"] = function(source, amount)
         local xPlayer = Utils.FrameworkObject.GetPlayerFromId(source)
         xPlayer.removeMoney(amount)
@@ -496,14 +514,14 @@ RemoveMoney = {
 }
 
 ---@param source number The players server id
----@param amount number The amount of money to remove
-function RemoveMoney(source, amount)
-    if RemoveMoney[Utils.Framework] then
-        RemoveMoney[Utils.Framework](source, amount)
+---@param amount number The amount of money to check
+function HasMoney(source, amount)
+    if HasMoneyData[Utils.Framework] then
+        return HasMoneyData[Utils.Framework](source, amount)
     end
 end
 
-HasMoney = {
+HasMoneyData = {
     ["es_extended"] = function(source, amount)
         local xPlayer = Utils.FrameworkObject.GetPlayerFromId(source)
         return xPlayer.getMoney() >= amount
@@ -513,23 +531,6 @@ HasMoney = {
         return player.PlayerData.money["cash"] >= amount
     end
 }
-
----@param source number The players server id
----@param amount number The amount of money to check
-function HasMoney(source, amount)
-    if HasMoney[Utils.Framework] then
-        return HasMoney[Utils.Framework](source, amount)
-    end
-end
-
----@param source number The players server id
----@param item string The item name
----@param count number The amount of the item to remove
-function HasItem(source, item, count)
-    if HasItem[Utils.InventoryName] then
-        return HasItem[Utils.InventoryName](source, item, count)
-    end
-end
 
 ---@param source number The players server id
 ---@param item string The item name
