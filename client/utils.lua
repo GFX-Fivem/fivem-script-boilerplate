@@ -56,9 +56,9 @@ function GetClosestPedToPlayer()
   local playerPos = GetEntityCoords(playerPed)
   local closestPed = nil
   local closestDistance = 1000.0
-  local ped = nil
-  for i = 0, 256 do
-    ped = GetPed(i)
+  local peds = GetGamePool('CPed')
+
+  for k, ped in pairs(peds) do
     if ped ~= playerPed then
       local pedPos = GetEntityCoords(ped)
       local distance = #(playerPos - pedPos)
@@ -68,6 +68,7 @@ function GetClosestPedToPlayer()
       end
     end
   end
+
   return closestPed, closestDistance
 end
 
@@ -76,9 +77,9 @@ function GetClosestVehicleToPlayer()
   local playerPos = GetEntityCoords(playerPed)
   local closestVehicle = nil
   local closestDistance = 1000.0
-  local vehicle = nil
-  for i = 0, 256 do
-    vehicle = GetVehicle(i)
+  local vehicles = GetGamePool('CVehicle')
+
+  for k, vehicle in pairs(vehicles) do
     if vehicle ~= playerPed then
       local vehiclePos = GetEntityCoords(vehicle)
       local distance = #(playerPos - vehiclePos)
@@ -88,6 +89,7 @@ function GetClosestVehicleToPlayer()
       end
     end
   end
+  
   return closestVehicle, closestDistance
 end
 
