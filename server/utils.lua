@@ -556,6 +556,24 @@ function CreateRandomPlate()
     return plate
 end
 
+function table_copy(t)
+    local t2 = {}
+    for k,v in pairs(t) do
+        t2[k] = v
+    end
+    return t2
+end
+
+function ClearTableKeys(t)
+    local t2 = {}
+
+    for k, v in pairs(t) do
+        table.insert(t2, v)
+    end
+
+    return t
+end
+
 Citizen.CreateThread(function()
     InitalFunc()
 end)
