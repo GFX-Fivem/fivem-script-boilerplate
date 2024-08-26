@@ -5,7 +5,7 @@ local Init = {
     SQLScripts  =  { "mysql-async", "ghmattimysql", "oxmysql" },
 }
 
-local initialized = false
+initialized = false
 local currentResourceName = GetCurrentResourceName()
 
 ---@class Utils
@@ -45,12 +45,13 @@ end
 
 function InitalFunc()
     if initialized then return end
-    initialized = true
 
     InitFramework()
     InitInventory()
     InitSkinScript()
     InitSQLScript()
+    
+    initialized = true
 
     print("--------------["..currentResourceName.."]-----------------")
     print("Framework: "..(Utils.Framework or "Not found"))
@@ -398,7 +399,15 @@ RemoveItemData = {
 ---@param source number The players server id
 function GetInventory(source)
     if GetInventoryData[Utils.InventoryName] then
-        return GetInventoryData[Utils.InventoryName](source)
+        local inventory = GetInventoryData[Utils.InventoryName](source)
+        for k, v in pairs(inventory) do
+            if v.amount then
+                v.count = v.amount
+            elseif v.count then
+                v.amount = v.count
+            end
+        end
+        return inventory
     end
 end
 
@@ -425,6 +434,34 @@ GetInventoryData = {
         return exports["qs-inventory"]:GetInventory(source)
     end
 }
+
+GetItemCountData = {
+    ["esx_inventoryhud"] = function(source, item)
+        local xPlayer = Utils.FrameworkObject.GetPlayerFromId(source)
+        return xPlayer.getInventoryItem(item).count
+    end,
+    ["qb-inventory"] = function(source, item)
+        return exports["qb-inventory"]:GetItemCount(source, item)
+    end,
+    ["gfx-inventory"] = function(source, item)
+        return exports["gfx-inventory"]:GetItemCount(source, "inventory", item)
+    end,
+    ["ox_inventory"] = function(source, item)
+        return exports["ox_inventory"]:GetItemCount(source, item)
+    end,
+    ["codem-inventory"] = function(source, item)
+        return exports["codem-inventory"]:GetItemsTotalAmount(source, item)
+    end,
+    ["qs-inventory"] = function(source, item)
+        return exports["qs-inventory"]:GetItemTotalAmount(source, item)
+    end
+}
+
+function GetItemCount(source, item)
+    if GetItemCountData[Utils.InventoryName] then
+        return GetItemCountData[Utils.InventoryName](source, item)
+    end
+end
 
 ---@param source number The players server id
 ---@param item string The item name
@@ -458,20 +495,21 @@ HasItemData = {
 }
 
 ---@param source number The players server id
-function GetMoney(source)
+function GetMoney(source, moneyType)
     if GetMoneyData[Utils.Framework] then
-        return GetMoneyData[Utils.Framework](source)
+        return GetMoneyData[Utils.Framework](source, moneyType)
     end
 end
 
 GetMoneyData = {
-    ["es_extended"] = function(source)
+    ["es_extended"] = function(source, moneyType)
         local xPlayer = Utils.FrameworkObject.GetPlayerFromId(source)
-        return xPlayer.getMoney()
+        return moneyType == "bank" and xPlayer.getAccount("bank").money or xPlayer.getMoney()
     end,
-    ["qb-core"] = function(source)
+    ["qb-core"] = function(source, moneyType)
         local player = GetPlayer(source)
-        return player.PlayerData.money["cash"]
+        print(483, json.encode(player.PlayerData.money), moneyType)
+        return player.PlayerData.money[moneyType]
     end
 }
 
@@ -554,24 +592,6 @@ function CreateRandomPlate()
         plate = plate .. string.char(math.random(65, 90))
     end
     return plate
-end
-
-function table_copy(t)
-    local t2 = {}
-    for k,v in pairs(t) do
-        t2[k] = v
-    end
-    return t2
-end
-
-function ClearTableKeys(t)
-    local t2 = {}
-
-    for k, v in pairs(t) do
-        table.insert(t2, v)
-    end
-
-    return t
 end
 
 Citizen.CreateThread(function()
