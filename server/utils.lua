@@ -334,9 +334,9 @@ end
 ---@param count number The amount of the item to add
 ---@param metadata table The metadata of the item
 ---@param slot number The slot of the item
-function AddItem(source, item, count, metadata, slot)
+function AddItem(source, item, count, slot, metadata)
     if AddItemData[Utils.InventoryName] then
-        AddItemData[Utils.InventoryName](source, item, count, metadata, slot)
+        AddItemData[Utils.InventoryName](source, item, count, slot, metadata)
     end
 end
 
@@ -345,20 +345,19 @@ AddItemData =  {
         local xPlayer = Utils.FrameworkObject.GetPlayerFromId(source)
         xPlayer.addInventoryItem(item, count)
     end,
-    ["qb-inventory"] = function(source, item, count, metadata, slot)
-        exports["qb-inventory"]:AddItem(source, item, count, slot, metadata)
+    ["qb-inventory"] = function(source, item, count, slot)
+        exports["qb-inventory"]:AddItem(source, item, count)
     end,
-    ["gfx-inventory"] = function(source, item, count)
+    ["gfx-inventory"] = function(source, item, count, slot)
         exports["gfx-inventory"]:AddItem(source, "inventory", item, count)
     end,
-    ["ox_inventory"] = function(source, item, count, metadata, slot)
+    ["ox_inventory"] = function(source, item, count, slot, metadata)
         exports["ox_inventory"]:AddItem(source, item, count, metadata, slot)
-        
     end,
-    ["codem-inventory"] = function(source, item, count, metadata, slot)
-        exports["codem-inventory"]:AddItem(source, item, count, slot, metadata)
+    ["codem-inventory"] = function(source, item, count, slot)
+        exports["codem-inventory"]:AddItem(source, item, count, slot)
     end,
-    ["qs-inventory"] = function(source, item, count, metadata, slot)
+    ["qs-inventory"] = function(source, item, count, slot, metadata)
         exports["qs-inventory"]:AddItem(source, item, count, slot, metadata)
     end
 }
@@ -368,9 +367,9 @@ AddItemData =  {
 ---@param count number The amount of the item to remove
 ---@param metadata table The metadata of the item
 ---@param slot number The slot of the item
-function RemoveItem(source, item, count, metadata, slot)
+function RemoveItem(source, item, count, slot, metadata)
     if RemoveItemData[Utils.InventoryName] then
-        RemoveItemData[Utils.InventoryName](source, item, count, metadata, slot)
+        RemoveItemData[Utils.InventoryName](source, item, count, slot, metadata)
     end
 end
 
@@ -380,7 +379,7 @@ RemoveItemData = {
         xPlayer.removeInventoryItem(item, count)
     end,
     ["qb-inventory"] = function(source, item, count, slot)
-        exports["qb-inventory"]:RemoveItem(source, item, amount, slot)
+        exports["qb-inventory"]:RemoveItem(source, item, count, slot)
     end,
     ["gfx-inventory"] = function(source, item, count, slot)
         exports["gfx-inventory"]:RemoveItem(source, "inventory", item, count)
@@ -389,7 +388,7 @@ RemoveItemData = {
         exports["ox_inventory"]:RemoveItem(source, item, count, metadata, slot)
     end,
     ["codem-inventory"] = function(source, item, count, slot)
-        exports["codem-inventory"]:RemoveItem(source, item, amount, slot)
+        exports["codem-inventory"]:RemoveItem(source, item, count, slot)
     end,
     ["qs-inventory"] = function(source, item, count, slot, metadata)
         exports["qs-inventory"]:RemoveItem(source, item, count, slot, metadata)
@@ -508,7 +507,6 @@ GetMoneyData = {
     end,
     ["qb-core"] = function(source, moneyType)
         local player = GetPlayer(source)
-        print(483, json.encode(player.PlayerData.money), moneyType)
         return player.PlayerData.money[moneyType]
     end
 }
