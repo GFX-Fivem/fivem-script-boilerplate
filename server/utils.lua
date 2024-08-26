@@ -379,19 +379,19 @@ RemoveItemData = {
         local xPlayer = Utils.FrameworkObject.GetPlayerFromId(source)
         xPlayer.removeInventoryItem(item, count)
     end,
-    ["qb-inventory"] = function(source, item, count, metadata, slot)
-        exports["qb-inventory"]:RemoveItem(source, item, count, slot, metadata)
+    ["qb-inventory"] = function(source, item, count, slot)
+        exports["qb-inventory"]:RemoveItem(source, item, amount, slot)
     end,
-    ["gfx-inventory"] = function(source, item, count)
+    ["gfx-inventory"] = function(source, item, count, slot)
         exports["gfx-inventory"]:RemoveItem(source, "inventory", item, count)
     end,
-    ["ox_inventory"] = function(source, item, count, metadata, slot)
+    ["ox_inventory"] = function(source, item, count, slot, metadata)
         exports["ox_inventory"]:RemoveItem(source, item, count, metadata, slot)
     end,
-    ["codem-inventory"] = function(source, item, count, metadata, slot)
-        exports["codem-inventory"]:RemoveItem(source, item, count, slot)
+    ["codem-inventory"] = function(source, item, count, slot)
+        exports["codem-inventory"]:RemoveItem(source, item, amount, slot)
     end,
-    ["qs-inventory"] = function(source, item, count, metadata, slot)
+    ["qs-inventory"] = function(source, item, count, slot, metadata)
         exports["qs-inventory"]:RemoveItem(source, item, count, slot, metadata)
     end
 }
