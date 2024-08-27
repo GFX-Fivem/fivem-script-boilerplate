@@ -1,6 +1,6 @@
 local Init = {
     Frameworks  =  { "es_extended", "qb-core" },
-    Inventories =  { "qb-inventory", "esx_inventoryhud", "qs-inventory", "codem-inventory", "gfx-inventory", "ox_inventory" },
+    Inventories =  { "qb-inventory", "esx_inventoryhud", "qs-inventory", "codem-inventory", "gfx-inventory", "ox_inventory", "ps-inventory" },
     SkinScripts =  { "esx_skin", "qb-clothing", "skinchanger", "illenium-appearance", "fivem-appearance" },
     SQLScripts  =  { "mysql-async", "ghmattimysql", "oxmysql" },
 }
@@ -359,6 +359,9 @@ AddItemData =  {
     end,
     ["qs-inventory"] = function(source, item, count, slot, metadata)
         exports["qs-inventory"]:AddItem(source, item, count, slot, metadata)
+    end,
+    ["ps-inventory"] = function(source, item, count, slot)
+        exports["ps-inventory"]:AddItem(source, item, count, slot)
     end
 }
 
@@ -392,6 +395,9 @@ RemoveItemData = {
     end,
     ["qs-inventory"] = function(source, item, count, slot, metadata)
         exports["qs-inventory"]:RemoveItem(source, item, count, slot, metadata)
+    end,
+    ["ps-inventory"] = function(source, item, count, slot)
+        exports["ps-inventory"]:RemoveItem(source, item, count, slot)
     end
 }
 
@@ -431,6 +437,10 @@ GetInventoryData = {
     end,
     ["qs-inventory"] = function(source)
         return exports["qs-inventory"]:GetInventory(source)
+    end,
+    ["ps-inventory"] = function(source)
+        local identifier = GetIdentifier(source)
+        return exports["ps-inventory"]:LoadInventory(source, identifier)
     end
 }
 
@@ -453,6 +463,9 @@ GetItemCountData = {
     end,
     ["qs-inventory"] = function(source, item)
         return exports["qs-inventory"]:GetItemTotalAmount(source, item)
+    end,
+    ["ps-inventory"] = function(source, item)
+        return exports["ps-inventory"]:GetItemByName(source, item).amount
     end
 }
 
@@ -490,6 +503,9 @@ HasItemData = {
     end,
     ["qs-inventory"] = function(source, item, count)
         return exports["qs-inventory"]:GetItemTotalAmount(source, item) >= count
+    end,
+    ["ps-inventory"] = function(source, item, count)
+        return exports["ps-inventory"]:GetItemByName(source, item).amount >= count
     end
 }
 
