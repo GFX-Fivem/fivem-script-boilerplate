@@ -228,6 +228,8 @@ function GetPlayerNameBySource(source)
     elseif Utils.Framework == "qb-core" then
         local player = GetPlayer(source)
         return player.PlayerData.charinfo.firstname.." "..player.PlayerData.charinfo.lastname
+    else
+        return GetPlayerName(source)
     end
 end
 
