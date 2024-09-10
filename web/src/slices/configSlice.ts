@@ -11,11 +11,11 @@ const initialState: ConfigState = {
 };
 
 const configSlice = createSlice({
-    name: 'locale',
+    name: 'config',
     initialState,
     reducers: {
         setConfig: (state, action) => {
-            state.locale = action.payload
+            state.config = action.payload
         }
     },
 });
