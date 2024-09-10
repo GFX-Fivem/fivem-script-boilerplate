@@ -453,7 +453,8 @@ GetItemCountData = {
         return exports["qb-inventory"]:GetItemCount(source, item)
     end,
     ["gfx-inventory"] = function(source, item)
-        return exports["gfx-inventory"]:GetItemCount(source, "inventory", item)
+        local item = exports["gfx-inventory"]:GetItemByName(source, "inventory", item)
+        return item and item.count or 0
     end,
     ["ox_inventory"] = function(source, item)
         return exports["ox_inventory"]:GetItemCount(source, item)
@@ -493,7 +494,8 @@ HasItemData = {
         return exports["qb-inventory"]:HasItem(source, item, count)
     end,
     ["gfx-inventory"] = function(source, item, count)
-        return exports["gfx-inventory"]:HasItem(source, "inventory", item, count)
+        local item = exports["gfx-inventory"]:GetItemByName(source, "inventory", item)
+        return item and item.count >= count or false
     end,
     ["ox_inventory"] = function(source, item, count)
         return exports["ox_inventory"]:GetItemCount(source, item) >= count
