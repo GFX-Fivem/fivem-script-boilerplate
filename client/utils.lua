@@ -11,7 +11,6 @@ function SendReactMessage(action, data)
 end
 
 local currentResourceName = GetCurrentResourceName()
-
 local debugIsEnabled = GetConvarInt(('%s-debugMode'):format(currentResourceName), 0) == 1
 
 --- A simple debug print function that is dependent on a convar
@@ -217,4 +216,79 @@ function ClearTableKeys(t)
     end
 
     return t
+end
+
+local Init = {
+  Frameworks  =  { "es_extended", "qb-core" },
+}
+
+Utils = {
+  Framework,
+  FrameworkObject,
+  FrameworkShared,
+}
+
+Citizen.CreateThread(function()
+  InitFramework()
+end)
+
+function InitFramework()
+  if Utils.Framework ~= nil then return end
+  for i = 1, #Init.Frameworks do
+      if IsDuplicityVersion() then
+          if GetResourceState(Init.Frameworks[i]) == "started" then
+              Utils.Framework = Init.Frameworks[i]
+              Utils.FrameworkObject = InitFrameworkObject()
+              Utils.FrameworkShared = InitFrameworkShared()
+          end
+      else
+          if GetResourceState(Init.Frameworks[i]) == "started" then
+              Utils.Framework = Init.Frameworks[i]
+
+              Utils.FrameworkObject = InitFrameworkObject()
+              Utils.FrameworkShared = InitFrameworkShared()
+          end
+      end
+  end
+end
+
+function InitFrameworkObject()
+  if Utils.Framework == "es_extended" then
+      local ESX = nil
+      Citizen.CreateThread(function()
+        while ESX == nil do
+          Citizen.Wait(100)
+          TriggerEvent("esx:getSharedObject", function(obj) ESX = obj end)
+        end
+      end)
+      Wait(1000)
+      if ESX == nil then
+          ESX = exports["es_extended"]:getSharedObject()
+      end
+      return ESX
+  elseif Utils.Framework == "qb-core" then
+      local QBCore = nil
+      Citizen.CreateThread(function()
+        while QBCore == nil do
+          Citizen.Wait(100)
+          TriggerEvent("QBCore:GetObject", function(obj) QBCore = obj end)
+        end
+      end)
+      Wait(1000)
+      if QBCore == nil then
+          QBCore = exports["qb-core"]:GetCoreObject()
+      end
+      return QBCore
+  end
+end
+
+function InitFrameworkShared()
+  while Utils.FrameworkObject == nil do
+      Citizen.Wait(100)
+  end
+  if Utils.Framework == "qb-core" then
+      return Utils.FrameworkObject.Shared
+  elseif Utils.Framework == "es_extended" then
+      return Utils.FrameworkObject.Config
+  end
 end

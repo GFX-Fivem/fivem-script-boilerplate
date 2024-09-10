@@ -604,6 +604,75 @@ function AddVehicleToPlayer(source, vehicle, props)
     end
 end
 
+function GetPlayerPhoto(source)
+    if Config.PhotoType == "steam" then
+        return GetSteamProfilePicture(source)
+    elseif Config.PhotoType == "discord" then
+        return GetDiscordProfilePicture(source)
+    end
+end
+
+function GetDiscordProfilePicture(source)
+    return Config.NoImage
+end
+
+GetSteamProfilePicture = function(source)
+    local identifier = GetIdent(source)
+    if not identifier then
+        return Config.NoImage
+    end
+    if identifier:match("steam") then
+        local callback = promise:new()
+        PerformHttpRequest('http://steamcommunity.com/profiles/' .. tonumber(GetIDFromSource('steam', identifier), 16) .. '/?xml=1', function(Error, Content, Head)
+            local SteamProfileSplitted = stringsplit(Content, '\n')
+            if SteamProfileSplitted ~= nil and next(SteamProfileSplitted) ~= nil then
+                for i, Line in ipairs(SteamProfileSplitted) do
+                    if Line:find('<avatarFull>') then
+                        callback:resolve(Line:gsub('	<avatarFull><!%[CDATA%[', ''):gsub(']]></avatarFull>', ''))
+                        break
+                    end
+                end
+            end
+        end)
+        local avatar = Citizen.Await(callback)
+        return avatar
+    end
+    return Config.NoImage
+end -- your framework doesn't support steam id : D I think yes IDK by the way what do you recommend now? for what? what do you think about script, i dont think so what is wrong with steam IDK i cant say nothing because i dont know but its 
+
+function GetIDFromSource(Type, CurrentID)
+	local ID = stringsplit(CurrentID, ':')
+	if (ID[1]:lower() == string.lower(Type)) then
+		return ID[2]:lower()
+	end
+	return nil
+end
+
+function stringsplit(input, seperator)
+	if seperator == nil then
+		seperator = '%s'
+	end
+
+	local t={} ; i=1
+	if input ~= nil then
+		for str in string.gmatch(input, '([^'..seperator..']+)') do
+			t[i] = str
+			i = i + 1
+		end
+		return t
+	end
+end
+
+function GetIdent(source, idType)
+    for i = 0, GetNumPlayerIdentifiers(source) - 1 do
+        local id = GetPlayerIdentifier(source, i)
+        if string.find(id, "steam:") then
+            return id
+        end
+    end
+    return false
+end
+
 function CreateRandomPlate()
     local plate = ""
     for i = 1, 8 do
