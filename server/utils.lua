@@ -1,3 +1,4 @@
+local Avatars = {}
 local Init = {
     Frameworks  =  { "es_extended", "qb-core" },
     Inventories =  { "qb-inventory", "esx_inventoryhud", "qs-inventory", "codem-inventory", "gfx-inventory", "ox_inventory", "ps-inventory" },
@@ -679,6 +680,51 @@ function CreateRandomPlate()
         plate = plate .. string.char(math.random(65, 90))
     end
     return plate
+end
+
+function getPlayerAvatar(src)
+    if not Avatars[src] then
+        local identifiers = {}
+        local discord = nil
+
+        for i = 0, GetNumPlayerIdentifiers(src) - 1 do
+            local license = GetPlayerIdentifier(src, i)
+    
+            if string.sub(license, 1, string.len("discord:")) == "discord:" then
+                discord = license
+            end
+        end
+
+        local avatar = nil
+
+        if discord then
+            discord = string.sub(discord, 9, string.len(discord))
+            local p = promise.new()
+
+            PerformHttpRequest("https://discordapp.com/api/users/" .. discord, function(statusCode, data)
+                if statusCode == 200 then
+                    data = json.decode(data or "{}")
+
+                    if data.avatar then
+                        local animated = data.avatar:gsub(1, 2) == "a_"
+
+                        avatar = "https://cdn.discordapp.com/avatars/" ..
+                            discord .. "/" .. data.avatar .. (animated and ".gif" or ".png")
+                    end
+                end
+
+                p:resolve()
+            end, "GET", "", {
+                Authorization = "Bot " .. Config.DiscordBotToken
+            })
+
+            Citizen.Await(p)
+        end
+
+        Avatars[src] = avatar or "default.png"
+    end
+
+    return Avatars[src]
 end
 
 Citizen.CreateThread(function()
