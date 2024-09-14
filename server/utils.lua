@@ -614,7 +614,7 @@ function GetPlayerPhoto(source)
 end
 
 function GetDiscordProfilePicture(source)
-    return Config.NoImage
+    return getPlayerAvatar(source)
 end
 
 GetSteamProfilePicture = function(source)
