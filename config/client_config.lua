@@ -1,7 +1,7 @@
 Config = {
 
     Theme = {
-        ["primary"] = '#FF2F2F',
+        ["primary"] = '#ff4f22',
         ["primary-content"] = '#900000',
         ["primary-opacity"] = "rgba(255, 47, 47, 0.2)",
         ["secondary"] = "#FF2F2F",
@@ -11,5 +11,6 @@ Config = {
 }
 
 Citizen.CreateThread(function()
-  SendReactMessage('setConfig', Config)
+    Citizen.Wait(1)
+    SendReactMessage('setConfig', Config)
 end)

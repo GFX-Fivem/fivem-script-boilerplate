@@ -21,11 +21,12 @@ const App: React.FC = () => {
   useNuiEvent("setLocale", (locale) => dispatch(setLocale(locale)));
   useNuiEvent("setConfig", (config: any) => {
     dispatch(setConfig(config));
-    setTheme(config.theme)
+    console.log(24, config.Theme)
+    setTheme(config.Theme)
   });
 
   return (
-    <div>
+    <div className="w-full h-screen">
       
     </div>
   );

@@ -294,3 +294,4 @@ function InitFrameworkShared()
       return Utils.FrameworkObject.Config
   end
 end
+
