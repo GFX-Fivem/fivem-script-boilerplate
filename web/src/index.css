@@ -12,8 +12,15 @@ body {
   height: 100vh;
 }
 
-#root {
-  height: 100%
+:root {
+  height: 100%;
+  --color-primary: rgb(17, 201, 247);
+  --color-primary-content: #ecf0f1;
+  --color-primary-opacity: rgba(17, 201, 247, 0.2);
+
+  --color-secondary: rgb(17, 201, 247);
+  --color-secondary-content: #ecf0f1;
+  --color-secondary-opacity: rgba(17, 201, 247, 0.2);
 }
 
 code {
