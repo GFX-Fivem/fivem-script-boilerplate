@@ -730,3 +730,18 @@ end
 Citizen.CreateThread(function()
     InitalFunc()
 end)
+
+Notify = function(source, message)
+    if Config.Notify then
+        Config.Notify(source, message)
+        return
+    end
+    if Utils.Framework == "es_extended" then
+        local xPlayer = Utils.FrameworkObject.GetPlayerFromId(source)
+        xPlayer.showNotification(message)
+    elseif Utils.Framework == "qb-core" then
+        local player = Utils.FrameworkObject.Functions.GetPlayer(source)
+        player.Functions.Notify(message)
+    
+    end
+end

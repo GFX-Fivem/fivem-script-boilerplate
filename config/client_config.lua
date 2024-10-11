@@ -1,5 +1,4 @@
 Config = {
-
     Theme = {
         ["primary"] = '#ff4f22',
         ["primary-content"] = '#900000',
@@ -8,6 +7,9 @@ Config = {
         ["secondary-content"] = '#900000',
         ["secondary-opacity"] = "rgba(255, 47, 47, 0.2)",
     }
+    -- Notify = function(source, message)
+        
+    -- end, -- Uncomment this line and paste your export to enable custom notifications
 }
 
 Citizen.CreateThread(function()

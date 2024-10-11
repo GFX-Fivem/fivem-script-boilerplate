@@ -295,3 +295,15 @@ function InitFrameworkShared()
   end
 end
 
+Notify = function(message)
+  if Config.Notify then
+    Config.Notify(message)
+    return
+  end
+
+  if Utils.Framework == "es_extended" then
+    Utils.FrameworkObject.ShowNotification(message)
+  elseif Utils.Framework == "qb-core" then
+    Utils.FrameworkObject.Functions.Notify(message)
+  end
+end
